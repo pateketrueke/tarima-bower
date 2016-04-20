@@ -13,7 +13,7 @@ module.exports = function() {
 
   var isDebug = this.ready() || logger.isDebug();
 
-  var options = this.opts.pluginOptions.bowerFiles || {};
+  var options = this.opts.pluginOptions.bower || {};
 
   var vendorDest = path.join(this.opts.public, options.dest || 'vendor');
 
