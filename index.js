@@ -6,10 +6,13 @@ module.exports = function() {
   var copy = this.util.copy,
       read = this.util.read,
       write = this.util.write,
+      mtime = this.util.mtime,
+      exists = this.util.exists,
       timeDiff = this.util.timeDiff;
 
   var cwd = this.opts.cwd,
       logger = this.logger,
+      cache = this.cache,
       dist = this.dist;
 
   var options = this.opts.pluginOptions.bower || {};
@@ -34,12 +37,28 @@ module.exports = function() {
     }
   });
 
-  var bowerDir = options.bowerDir || path.join(this.opts.cwd, 'bower_components');
+  var bowerFile = path.join(this.opts.cwd, options.bowerFile || 'bower.json'),
+      bowerDir = path.join(this.opts.cwd, options.bowerDir || 'bower_components');
+
+  var tmp = cache.get(bowerFile) || {};
+
+  function ensureDist(target) {
+    var entry = tmp[target.dest];
+
+    var isDirty = !entry
+      || !exists(target.dest) || (mtime(target.dest) < entry);
+
+    if (isDirty) {
+      dist(target);
+    }
+
+    tmp[target.dest] = mtime(target.dest);
+  }
 
   function mirror(src, dest) {
     if (src.length) {
       src.forEach(function(file) {
-        dist({
+        ensureDist({
           type: 'copy',
           src: file,
           dest: path.join(dest, path.relative(bowerDir, file))
@@ -50,7 +69,7 @@ module.exports = function() {
 
   function concat(src, dest) {
     if (src.length) {
-      dist({
+      ensureDist({
         type: 'concat',
         src: src,
         dest: dest
@@ -67,4 +86,6 @@ module.exports = function() {
     concat(files.css, vendorDest + '.css');
     concat(files.js, vendorDest + '.js');
   }
+
+  cache.set(bowerFile, tmp);
 };
