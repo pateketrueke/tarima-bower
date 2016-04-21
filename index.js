@@ -9,7 +9,8 @@ module.exports = function() {
       timeDiff = this.util.timeDiff;
 
   var cwd = this.opts.cwd,
-      logger = this.logger;
+      logger = this.logger,
+      dist = this.dist;
 
   var options = this.opts.pluginOptions.bower || {};
 
@@ -38,28 +39,21 @@ module.exports = function() {
   function mirror(src, dest) {
     if (src.length) {
       src.forEach(function(file) {
-        var target = {
+        dist({
+          type: 'copy',
           src: file,
           dest: path.join(dest, path.relative(bowerDir, file))
-        };
-
-        logger.status('copy', target, function() {
-          copy(target.src, target.dest);
         });
       });
     }
   }
 
   function concat(src, dest) {
-    if (src.length)  {
-      var target = {
+    if (src.length) {
+      dist({
+        type: 'concat',
+        src: src,
         dest: dest
-      };
-
-      logger.status('write', target, function() {
-        write(dest, src.map(function(file) {
-          return read(file);
-        }).join('\n'));
       });
     }
   }
