@@ -11,8 +11,6 @@ module.exports = function() {
   var cwd = this.opts.cwd,
       logger = this.logger;
 
-  var isDebug = this.ready() || logger.isDebug();
-
   var options = this.opts.pluginOptions.bower || {};
 
   var vendorDest = path.join(this.opts.public, options.dest || 'vendor');
@@ -23,15 +21,7 @@ module.exports = function() {
     js: []
   };
 
-  var start = new Date();
-
   var vendor = mainFiles();
-
-  if (isDebug) {
-    logger.printf('{info.blackBright|%s asset%s found, processing...}',
-      vendor.length,
-      vendor.length !== 1 ? 's' : '');
-  }
 
   vendor.forEach(function(file) {
     if (file.indexOf('.css') > -1) {
@@ -48,16 +38,29 @@ module.exports = function() {
   function mirror(src, dest) {
     if (src.length) {
       src.forEach(function(file) {
-        copy(file, path.join(dest, path.relative(bowerDir, file)));
+        var target = {
+          src: file,
+          dest: path.join(dest, path.relative(bowerDir, file))
+        };
+
+        logger.status('copy', target, function() {
+          copy(target.src, target.dest);
+        });
       });
     }
   }
 
   function concat(src, dest) {
     if (src.length)  {
-      write(dest, src.map(function(file) {
-        return read(file);
-      }).join('\n'));
+      var target = {
+        dest: dest
+      };
+
+      logger.status('write', target, function() {
+        write(dest, src.map(function(file) {
+          return read(file);
+        }).join('\n'));
+      });
     }
   }
 
@@ -70,9 +73,4 @@ module.exports = function() {
     concat(files.css, vendorDest + '.css');
     concat(files.js, vendorDest + '.js');
   }
-
-  logger.printf('\r{info.blackBright|%s asset%s installed in %s}\n',
-    vendor.length,
-    vendor.length !== 1 ? 's' : '',
-    timeDiff(start));
 };
