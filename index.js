@@ -45,8 +45,21 @@ module.exports = function() {
   function ensureDist(target) {
     var entry = tmp[target.dest];
 
+    var latest = exists(target.dest) ? mtime(target.dest) : 0;
+
     var isDirty = !entry
-      || !exists(target.dest) || (mtime(target.dest) < entry);
+      || (latest && latest < entry);
+
+    if (Array.isArray(target.src)) {
+      for (var key in target.src) {
+        var src = target.src[key];
+
+        if (mtime(src) > latest) {
+          isDirty = true;
+          break;
+        }
+      };
+    }
 
     if (isDirty) {
       dist(target);
