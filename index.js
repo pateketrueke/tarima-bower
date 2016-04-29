@@ -42,6 +42,10 @@ module.exports = function() {
 
   var tmp = cache.get(bowerFile) || {};
 
+  if (Object.keys(tmp).length !== vendor.length) {
+    tmp = {};
+  }
+
   function ensureDist(target) {
     var entry = tmp[target.dest];
 
