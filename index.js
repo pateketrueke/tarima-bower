@@ -40,6 +40,8 @@ module.exports = function() {
   var bowerFile = path.join(this.opts.cwd, options.bowerFile || 'bower.json'),
       bowerDir = path.join(this.opts.cwd, options.bowerDir || 'bower_components');
 
+  var isForced = this.opts.force;
+
   var tmp = cache.get(bowerFile) || {};
 
   if (Object.keys(tmp).length !== vendor.length) {
@@ -47,25 +49,28 @@ module.exports = function() {
   }
 
   function ensureDist(target) {
-    var entry = tmp[target.dest];
+    var isDirty;
 
-    var latest = exists(target.dest) ? mtime(target.dest) : 0;
+    if (!isForced) {
+      var entry = tmp[target.dest];
 
-    var isDirty = !entry
-      || (latest && latest < entry);
+      var latest = exists(target.dest) ? mtime(target.dest) : 0;
 
-    if (Array.isArray(target.src)) {
-      for (var key in target.src) {
-        var src = target.src[key];
+      isDirty = !entry || (latest && latest < entry);
 
-        if (mtime(src) > latest) {
-          isDirty = true;
-          break;
-        }
-      };
+      if (Array.isArray(target.src)) {
+        for (var key in target.src) {
+          var src = target.src[key];
+
+          if (mtime(src) > latest) {
+            isDirty = true;
+            break;
+          }
+        };
+      }
     }
 
-    if (isDirty) {
+    if (isForced || isDirty) {
       dist(target);
     }
 
