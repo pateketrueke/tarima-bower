@@ -11,7 +11,6 @@ module.exports = function() {
       timeDiff = this.util.timeDiff;
 
   var cwd = this.opts.cwd,
-      logger = this.logger,
       cache = this.cache,
       dist = this.dist;
 
