@@ -36,7 +36,7 @@ module.exports = function() {
     }
   });
 
-  var bowerFile = path.join(this.opts.cwd, options.bowerFile || 'bower.json'),
+  var bowerFile = path.relative(this.opts.cwd, options.bowerFile || 'bower.json'),
       bowerDir = path.join(this.opts.cwd, options.bowerDir || 'bower_components');
 
   var isForced = this.opts.force;
