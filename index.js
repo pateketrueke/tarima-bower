@@ -16,7 +16,7 @@ module.exports = function() {
 
   var options = this.opts.pluginOptions.bower || {};
 
-  var vendorDest = path.join(this.opts.public, options.dest || 'vendor');
+  var vendorDest = path.relative(this.opts.cwd, path.join(this.opts.public, options.dest || 'vendor'));
 
   var files = {
     other: [],
