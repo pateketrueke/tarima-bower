@@ -11,12 +11,11 @@ module.exports = function() {
       timeDiff = this.util.timeDiff;
 
   var cwd = this.opts.cwd,
-      cache = this.cache,
       dist = this.dist;
 
   var options = this.opts.pluginOptions.bower || {};
 
-  var vendorDest = path.relative(this.opts.cwd, path.join(this.opts.public, options.dest || 'vendor'));
+  var vendorDest = path.relative(cwd, path.join(this.opts.public, options.dest || 'vendor'));
 
   var files = {
     other: [],
@@ -36,15 +35,15 @@ module.exports = function() {
     }
   });
 
-  var bowerFile = path.relative(this.opts.cwd, options.bowerFile || 'bower.json'),
-      bowerDir = path.join(this.opts.cwd, options.bowerDir || 'bower_components');
+  var bowerFile = path.relative(cwd, options.bowerFile || 'bower.json'),
+      bowerDir = path.join(cwd, options.bowerDir || 'bower_components');
 
   var isForced = this.opts.force;
 
-  var tmp = cache.get(bowerFile) || {};
+  var tmp = this.cache.get(bowerFile) || {};
 
-  if (Object.keys(tmp).length !== vendor.length) {
-    tmp = {};
+  if (mtime(bowerFile) <= tmp.mtime) {
+    return;
   }
 
   function ensureDist(target) {
@@ -71,9 +70,8 @@ module.exports = function() {
 
     if (isForced || isDirty) {
       dist(target);
+      tmp[target.dest] = mtime(target.dest);
     }
-
-    tmp[target.dest] = mtime(target.dest);
   }
 
   function mirror(src, dest) {
@@ -81,7 +79,7 @@ module.exports = function() {
       src.forEach(function(file) {
         ensureDist({
           type: 'copy',
-          src: file,
+          src: path.relative(cwd, file),
           dest: path.join(dest, path.relative(bowerDir, file))
         });
       });
@@ -108,5 +106,5 @@ module.exports = function() {
     concat(files.js, vendorDest + '.js');
   }
 
-  cache.set(bowerFile, tmp);
+  this.cache.set(bowerFile, tmp);
 };
