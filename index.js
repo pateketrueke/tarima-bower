@@ -96,6 +96,8 @@ module.exports = function() {
     }
   }
 
+  this.logger.info('\r\r{% log Reading from: %} {% yellow %s %}\n', bowerFile);
+
   mirror(files.other, vendorDest);
 
   if (!options.bundle) {
