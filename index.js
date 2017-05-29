@@ -17,32 +17,25 @@ module.exports = function() {
 
   var vendorDest = path.relative(cwd, path.join(this.opts.public, options.dest || 'vendor'));
 
+  var bowerFile = path.relative(cwd, options.bowerFile || 'bower.json'),
+      bowerDir = path.join(cwd, options.bowerDir || 'bower_components');
+
+  var isForced = this.opts.force;
+
   var files = {
     other: [],
     css: [],
     js: []
   };
 
-  var vendor = mainFiles();
-
-  vendor.forEach(function(file) {
-    if (file.indexOf('.css') > -1) {
-      files.css.push(file);
-    } else if (file.indexOf('.js') > -1) {
-      files.js.push(file);
-    } else {
-      files.other.push(file);
-    }
-  });
-
-  var bowerFile = path.relative(cwd, options.bowerFile || 'bower.json'),
-      bowerDir = path.join(cwd, options.bowerDir || 'bower_components');
-
-  var isForced = this.opts.force;
-
   var tmp = this.cache.get(bowerFile) || {};
+  var changed = mtime(bowerFile) <= tmp.mtime;
 
-  if (mtime(bowerFile) <= tmp.mtime) {
+  this.logger.info('\r\r{% log Reading from: %} {% yellow %s %}%s\n',
+    bowerFile,
+    changed ? ' {% gray (without changes) %}' : '');
+
+  if (changed) {
     return;
   }
 
@@ -96,7 +89,17 @@ module.exports = function() {
     }
   }
 
-  this.logger.info('\r\r{% log Reading from: %} {% yellow %s %}\n', bowerFile);
+  var vendor = mainFiles();
+
+  vendor.forEach(function(file) {
+    if (file.indexOf('.css') > -1) {
+      files.css.push(file);
+    } else if (file.indexOf('.js') > -1) {
+      files.js.push(file);
+    } else {
+      files.other.push(file);
+    }
+  });
 
   mirror(files.other, vendorDest);
 
