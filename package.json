@@ -1,6 +1,6 @@
 {
   "name": "tarima-bower",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Bower support for tarima-cli",
   "main": "index.js",
   "license": "MIT",
