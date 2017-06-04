@@ -13,7 +13,7 @@ module.exports = function() {
   var cwd = this.opts.cwd,
       dist = this.dist;
 
-  var options = this.opts.pluginOptions.bower || {};
+  var options = this.opts.pluginOptions['tarima-bower'] || this.opts.pluginOptions.bower || {};
 
   var vendorDest = path.relative(cwd, path.join(this.opts.public, options.dest || 'vendor'));
 
