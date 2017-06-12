@@ -15,13 +15,13 @@ module.exports = function() {
 
   var options = this.opts.pluginOptions['tarima-bower'] || this.opts.pluginOptions.bower || {};
 
-  var vendorDest = path.relative(cwd, options.public
+  var vendorDest = path.relative(cwd, options.vendor
     || path.join(this.opts.public, options.dest || 'vendor'));
 
   var bowerFile = path.relative(cwd, options.bowerFile || 'bower.json'),
       bowerDir = path.join(cwd, options.bowerDir || 'bower_components');
 
-  var isForced = this.opts.force;
+  var isForced = this.opts.flags.force;
 
   var files = {
     other: [],
@@ -30,15 +30,7 @@ module.exports = function() {
   };
 
   var tmp = this.cache.get(bowerFile) || {};
-  var changed = mtime(bowerFile) <= tmp.mtime;
-
-  this.logger.info('\r\r{% log Reading from: %} {% yellow %s %}%s\n',
-    bowerFile,
-    changed ? ' {% gray (without changes) %}' : '');
-
-  if (changed) {
-    return;
-  }
+  var changed = mtime(bowerFile) > tmp.mtime;
 
   function ensureDist(target) {
     var isDirty;
@@ -90,36 +82,46 @@ module.exports = function() {
     }
   }
 
-  var vendor = mainFiles();
-
-  this.logger.info('\r\r{% end %s file%s %s found %}\n',
-    vendor.length,
-    vendor.length === 1 ? '' : 's',
-    vendor.length === 1 ? 'was' : 'were');
-
-  if (!vendor.length) {
-    return;
-  }
-
-  vendor.forEach(function(file) {
-    if (file.indexOf('.css') > -1) {
-      files.css.push(file);
-    } else if (file.indexOf('.js') > -1) {
-      files.js.push(file);
-    } else {
-      files.other.push(file);
+  this.logger('read', bowerFile, end => {
+    if (!changed && isForced !== true) {
+      return end(bowerFile, 'skip', 'end');
     }
+
+    var vendor;
+
+    try {
+      vendor = mainFiles();
+    } catch (e) {
+      end(bowerFile, 'read', 'failure');
+      return;
+    }
+
+    if (!vendor.length) {
+      return end(bowerFile, 'empty', 'end');
+    }
+
+    vendor.forEach(function(file) {
+      if (file.indexOf('.css') > -1) {
+        files.css.push(file);
+      } else if (file.indexOf('.js') > -1) {
+        files.js.push(file);
+      } else {
+        files.other.push(file);
+      }
+    });
+
+    mirror(files.other, vendorDest);
+
+    if (!options.bundle) {
+      mirror(files.css, vendorDest);
+      mirror(files.js, vendorDest);
+    } else {
+      concat(files.css, vendorDest + '.css');
+      concat(files.js, vendorDest + '.js');
+    }
+
+    this.cache.set(bowerFile, tmp);
+
+    end(bowerFile, 'read', 'end');
   });
-
-  mirror(files.other, vendorDest);
-
-  if (!options.bundle) {
-    mirror(files.css, vendorDest);
-    mirror(files.js, vendorDest);
-  } else {
-    concat(files.css, vendorDest + '.css');
-    concat(files.js, vendorDest + '.js');
-  }
-
-  this.cache.set(bowerFile, tmp);
 };
