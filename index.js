@@ -15,7 +15,8 @@ module.exports = function() {
 
   var options = this.opts.pluginOptions['tarima-bower'] || this.opts.pluginOptions.bower || {};
 
-  var vendorDest = path.relative(cwd, path.join(this.opts.public, options.dest || 'vendor'));
+  var vendorDest = path.relative(cwd, options.public
+    || path.join(this.opts.public, options.dest || 'vendor'));
 
   var bowerFile = path.relative(cwd, options.bowerFile || 'bower.json'),
       bowerDir = path.join(cwd, options.bowerDir || 'bower_components');
@@ -91,7 +92,7 @@ module.exports = function() {
 
   var vendor = mainFiles();
 
-  this.logger.info('\r\r{% ok %s file%s %s found %}\n',
+  this.logger.info('\r\r{% end %s file%s %s found %}\n',
     vendor.length,
     vendor.length === 1 ? '' : 's',
     vendor.length === 1 ? 'was' : 'were');
