@@ -91,6 +91,15 @@ module.exports = function() {
 
   var vendor = mainFiles();
 
+  this.logger.info('\r\r{% ok %s file%s %s found %}\n',
+    vendor.length,
+    vendor.length === 1 ? '' : 's',
+    vendor.length === 1 ? 'was' : 'were');
+
+  if (!vendor.length) {
+    return;
+  }
+
   vendor.forEach(function(file) {
     if (file.indexOf('.css') > -1) {
       files.css.push(file);
