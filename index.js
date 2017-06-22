@@ -76,7 +76,7 @@ module.exports = function() {
     if (src.length) {
       ensureDist({
         type: 'concat',
-        src: src,
+        src: src.map(x => path.relative(cwd, x)),
         dest: dest
       });
     }
