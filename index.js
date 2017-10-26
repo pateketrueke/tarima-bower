@@ -82,11 +82,11 @@ module.exports = function() {
     }
   }
 
-  this.logger('read', bowerFile, end => {
-    if (!changed && isForced !== true) {
-      return end(bowerFile, 'skip', 'end');
-    }
+  if (!changed && isForced !== true) {
+    return;
+  }
 
+  this.logger('read', bowerFile, end => {
     var vendor;
 
     try {
