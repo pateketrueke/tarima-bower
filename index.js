@@ -92,6 +92,7 @@ module.exports = function() {
     try {
       vendor = mainFiles();
     } catch (e) {
+      this.logger.info('\r\r{% warning %s %}\n', e.message || e.toString());
       end(bowerFile, 'read', 'failure');
       return;
     }
