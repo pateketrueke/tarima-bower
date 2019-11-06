@@ -30,7 +30,7 @@ module.exports = function() {
   };
 
   var tmp = this.cache.get(bowerFile) || {};
-  var changed = mtime(bowerFile) > tmp.mtime;
+  var changed = !tmp.mtime || mtime(bowerFile) > tmp.mtime;
 
   function ensureDist(target) {
     var isDirty;
