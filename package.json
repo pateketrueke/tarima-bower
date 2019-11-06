@@ -6,5 +6,10 @@
   "license": "MIT",
   "dependencies": {
     "main-bower-files": "^2.13.0"
+  },
+  "devDependencies": {
+    "randomatic": ">=3.0.0",
+    "extend": ">=2.0.2",
+    "braces": ">=2.3.1"
   }
 }
